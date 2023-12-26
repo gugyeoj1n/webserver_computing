@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 
 def index(req) :
+    print(req)
     return HttpResponse("앙 김옥지~")
 
 def test(req) :
