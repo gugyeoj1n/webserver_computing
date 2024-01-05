@@ -4,6 +4,7 @@ from .models import Question, Answer
 from django.utils import timezone
 from .forms import QuestionForm, AnswerForm
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
 
 
 def index(req) :
@@ -25,12 +26,14 @@ def detail(req, question_id) :
     return render(req, 'pybo/question_detail.html', context)
 
 
+@login_required(login_url='common:login')
 def answer_create(req, question_id):
     question = get_object_or_404(Question, id = question_id)
     if req.method == 'POST':
         form = AnswerForm(req.POST)
         if form.is_valid():
             answer = form.save(commit=False)
+            answer.author = req.user
             answer.create_date = timezone.now()
             answer.question = question
             answer.save()
@@ -42,11 +45,13 @@ def answer_create(req, question_id):
     return render(req, 'pybo/question_detail.html', context)
 
 
+@login_required(login_url='common:login')
 def question_create(req):
     if req.method == 'POST':
         form = QuestionForm(req.POST)
         if form.is_valid():
             question = form.save(commit=False)
+            question.author = req.user
             question.create_date = timezone.now()
             question.save()
             return redirect('pybo:index')
